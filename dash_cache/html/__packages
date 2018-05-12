@@ -1,0 +1,14 @@
+base
+flexdashboard
+ggplot2
+Matrix
+arules
+arulesViz
+visNetwork
+tidyr
+dplyr
+magrittr
+igraph
+stringr
+plotly
+bindrcpp

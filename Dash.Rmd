@@ -43,11 +43,32 @@ p <- plot_ly(data, x= ~Observaciones, y= v ,type = "bar",
          margin = list(l = 200)) 
 ```
 
+```{r echo=FALSE}
+#Carga y formula
+datos <-read.csv("/home/jennifer/Descargas/ideds.csv")
+datos$EdadRango <- discretize(datos$Edad,method = "fixed", categories = c(-Inf,seq(0,65,5),Inf),labels = c("<0","0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64",">65"))
+## Caracterización general
+#General
+datos %>% group_by(EdadRango, Genero) %>% summarise(Poblacion=n()) %>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion1
+
+datos$Cluster <- paste("Cluster", datos$Cluster, sep= " ")
+#ggcaracterizacion
+#ggplotly(ggcaracterizacion1)
+```
+
 Column {data-width=600}
 -----------------------------------------------------------------------
 
 ### Chart A
 
+```{r}
+ggplotly(ggcaracterizacion1)
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart A
 ```{r}
 p
 ```

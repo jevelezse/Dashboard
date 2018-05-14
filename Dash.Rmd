@@ -40,20 +40,39 @@ p <- plot_ly(data, x= ~Observaciones, y= v ,type = "bar",
                      showline = FALSE,
                      showticklabels = FALSE,
                      showgrid = FALSE),
-         margin = list(l = 200)) 
+         margin = list(l = 200))
+
 ```
 
-```{r echo=FALSE}
+```{r}
+conteos1 <- read.csv('edad.csv', header = TRUE)
+data1 <- as.data.frame(conteos1)
+v1 <-reorder(data1$Caracteristica,data1$Observaciones) #ordenar y convertir en factores
+p1 <- plot_ly(data1, x= data1$Observaciones, y= v1 ,type = "bar",
+             text = data1$Observaciones, textposition = 'auto',
+             marker = list(color = 'rgb(221,160,221)'))%>% 
+  layout(title = "",
+         yaxis= list(title = "Rango de edad", type ='category'),
+         xaxis = list(title = "",
+                     zeroline = FALSE,
+                     showline = FALSE,
+                     showticklabels = FALSE,
+                     showgrid = FALSE),
+         margin = list(l = 100)) # control del margen 
+```
+
+
+```{r echo=FALSE,fig.width=6}
 #Carga y formula
 datos <-read.csv("/home/jennifer/Descargas/ideds.csv")
-datos$EdadRango <- discretize(datos$Edad,method = "fixed", categories = c(-Inf,seq(0,65,5),Inf),labels = c("<0","0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64",">65"))
+datos$EdadRango <- discretize(datos$Edad,method = "fixed", breaks  = c(-Inf,seq(0,65,5),Inf),labels = c("<0","0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64",">65"))
 ## Caracterización general
 #General
 datos %>% group_by(EdadRango, Genero) %>% summarise(Poblacion=n()) %>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion1
 
 datos$Cluster <- paste("Cluster", datos$Cluster, sep= " ")
 #ggcaracterizacion
-#ggplotly(ggcaracterizacion1)
+#ggplotly(ggcaracterizacion1) 
 ```
 
 Column {data-width=600}
@@ -68,11 +87,15 @@ ggplotly(ggcaracterizacion1)
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart A
+### Chart B
 ```{r}
 p
 ```
 
+### Chart C
+```{r}
+p1
+```
 
 Cluster 1 
 =====================================  

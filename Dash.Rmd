@@ -19,6 +19,7 @@ library("magrittr")
 library("igraph")
 library("stringr")
 library("plotly")
+library("arulesCBA")
 ```
 
 General 
@@ -215,6 +216,7 @@ a<-visNetwork(nodes, edges, width = "90%") %>%
   visEdges(arrows ="to") %>%                            # arrow "to" for all edges
   visGroups(groupname = "regla") %>%    # darkblue for group "A"
   visGroups(groupname = "Condicion",shape = "icon",icon = list(code = "f007", color = "pink"), color = "red")
+
 ```
 
 Column {data-width=600}

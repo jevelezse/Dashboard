@@ -19,7 +19,9 @@ library("magrittr")
 library("igraph")
 library("stringr")
 library("plotly")
-library("arulesCBA")
+library("shinythemes")
+library("DT")
+library("xtable") #Tablas latex.
 ```
 
 General 
@@ -555,9 +557,9 @@ Column {data-width=350}
 
 ```{r echo=FALSE}
 
-datos %>% filter(Cluster %in% c("Cluster 3")) %>% group_by(EdadRango, Genero, Cluster) %>% summarise(Poblacion=n())%>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() + facet_wrap( ~ Cluster, ncol = 2) +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion2
+datos %>% filter(Cluster %in% c("Cluster 3")) %>% group_by(EdadRango, Genero, Cluster) %>% summarise(Poblacion=n())%>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() + facet_wrap( ~ Cluster, ncol = 2) +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion3
 
-ggplotly(ggcaracterizacion2)
+ggplotly(ggcaracterizacion3)
 ``` 
 
 ### Chart C
@@ -704,9 +706,9 @@ Column {data-width=350}
 
 ```{r echo=FALSE}
 
-datos %>% filter(Cluster %in% c("Cluster 4")) %>% group_by(EdadRango, Genero, Cluster) %>% summarise(Poblacion=n())%>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() + facet_wrap( ~ Cluster, ncol = 2) +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion2
+datos %>% filter(Cluster %in% c("Cluster 4")) %>% group_by(EdadRango, Genero, Cluster) %>% summarise(Poblacion=n())%>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() + facet_wrap( ~ Cluster, ncol = 2) +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion3
 
-ggplotly(ggcaracterizacion2)
+ggplotly(ggcaracterizacion3)
 ``` 
 
 ### Chart C
@@ -853,9 +855,9 @@ Column {data-width=350}
 
 ```{r echo=FALSE}
 
-datos %>% filter(Cluster %in% c("Cluster 5")) %>% group_by(EdadRango, Genero, Cluster) %>% summarise(Poblacion=n())%>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() + facet_wrap( ~ Cluster, ncol = 2) +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion2
+datos %>% filter(Cluster %in% c("Cluster 5")) %>% group_by(EdadRango, Genero, Cluster) %>% summarise(Poblacion=n())%>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() + facet_wrap( ~ Cluster, ncol = 2) +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion4
 
-ggplotly(ggcaracterizacion2)
+ggplotly(ggcaracterizacion4)
 ``` 
 
 ### Chart C
@@ -884,10 +886,10 @@ selectInput("n_breaks", label = "Gene",
 
 ```{r include=FALSE}
 par_clust <- "x" #cluster
-par_n <- 1 #Número de Cluster
+par_n <- 5 #Número de Cluster
 par_tipo <- "confidence"
 
-genes <- read.csv('genesok.csv') 
+genes <- read.csv('genesok1.csv') 
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))
@@ -904,8 +906,9 @@ genes %<>% filter(Gene %in% c("CFTR"))#,"BRCA1","ATM","MLH2", "PMS1", "MSH2", "M
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
-rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules"))
-#rules <-sort(rules, by ="lift")
+rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
+rules <- rules[!is.redundant(rules)]
+rules <-sort(rules, by ="support")
 #gato <- as(rules,"data.frame")
 gatos <- data.frame(lhs = labels(lhs(rules)), rhs = labels(rhs(rules)), rules@quality) 
 gatos$id <- rownames(gatos)
@@ -935,7 +938,7 @@ inspect(rules, by = "lift")
 ####### Codigo se Grafico ########
 
 #Crear dataframe
-rules_test <- rules[1:30,] # Filtro de reglas. 
+rules_test <- rules[1:20, by ="confidence"] # Filtro de reglas. 
 
 df_rules = data.frame(
   lhs = labels(lhs(rules_test)),
@@ -993,11 +996,12 @@ edges <- data.frame(from = df_reglas_gato$origen ,to=df_reglas_gato$destino)
 set.seed(1234)
 
 todo<-visNetwork(nodes, edges, width = "90%") %>% 
-  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = FALSE) %>%
   #visNodes(shape = "square") %>%                        # square for all nodes
   visEdges(arrows ="to") %>%                            # arrow "to" for all edges
   visGroups(groupname = "regla") %>%    # darkblue for group "A"
   visGroups(groupname = "Condicion",shape = "icon",icon = list(code = "f007", color = "pink"), color = "red")
+
 ```
 
 Reglas
@@ -1005,5 +1009,25 @@ Reglas
 
 ```{r}
 todo
+```
+
+Cluster 
+===================================== 
+
+
+```{r echo=FALSE}
+blc <- read.csv('genes.csv', stringsAsFactors = FALSE)
+output$table1 <- renderDataTable({
+
+DT::datatable(blc, extensions='Scroller', selection = 'single', options = list(pageLength=100, scrollY='400px', scrollX=TRUE, autoWidth=TRUE, searchHighlight=TRUE, scroller=TRUE), filter = 'top', class = "display cell-border")
+
+})
+
+DT::dataTableOutput('table1') 
+```
+
+
+```{r}
+
 ```
 

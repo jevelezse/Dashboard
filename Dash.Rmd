@@ -1,8 +1,9 @@
 ---
-title: "Colombian variant population"
+title: " poblacional colombiana"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
+    theme: cerulean
 runtime: shiny
 ---
 
@@ -25,8 +26,75 @@ library("shiny")
 library("xtable") #Tablas latex.
 ```
 
+
 General 
 =====================================
+
+Column {data-width=600}
+-----------------------------------------------------------------------------------------
+
+### Distribución demográfica
+
+```{r echo=FALSE,fig.width=6}
+#Carga y formula
+datos <-read.csv("/home/jennifer/Documentos/clusters/ideds.csv")
+datos$EdadRango <- discretize(datos$Edad,method = "fixed", breaks  = c(-Inf,seq(0,65,5),Inf),labels = c("<0","0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64",">65"))
+## Caracterización general
+#General
+datos %>% group_by(EdadRango, Genero) %>% summarise(Poblacion=n()) %>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion1
+
+datos$Cluster <- paste("Cluster", datos$Cluster, sep= " ")
+#ggcaracterizacion
+#ggplotly(ggcaracterizacion1) 
+```
+
+
+```{r}
+ggplotly(ggcaracterizacion1)
+
+```
+
+
+Column {data-width=400}
+-------------------------------------------------------------------------
+### Descripción
+
+<div class=text-justify>
+Esta es una aplicación  propuesta de análisis de variantes obtenidas a apartir de NGS utilizando técnicas de míneria de datos. Todos los datos utilizados en esta aplicación cuentan con consentimiento informado y fueron donados por el **Centro de investigaciones en Genética humana y reproductiva Genetix S.A.S**
+</div>
+
+### Variantes por rango de edad.
+
+```{r}
+conteos1 <- read.csv('edad.csv', header = TRUE)
+data1 <- as.data.frame(conteos1)
+v1 <-reorder(data1$Caracteristica,data1$Observaciones) #ordenar y convertir en factores
+p1 <- plot_ly(data1, x= data1$Observaciones, y= v1 ,type = "bar",
+             text = data1$Observaciones, textposition = 'auto',
+             marker = list(color = 'rgb(221,160,221)'))%>% 
+  layout(title = "",
+         yaxis= list(title = "Rango de edad", type ='category'),
+         xaxis = list(title = "",
+                     zeroline = FALSE,
+                     showline = FALSE,
+                     showticklabels = FALSE,
+                     showgrid = FALSE),
+         margin = list(l = 100)) # control del margen 
+```
+
+
+```{r}
+p1
+```
+
+
+Exploración de Variantes
+=====================================  
+
+Column 
+-------------------------------------
+
+### Grafico de distribución de variantes por edad. 
 
 ```{r include=FALSE}
 conteos <- read.csv('variantes.csv', header = TRUE)
@@ -48,58 +116,28 @@ p <- plot_ly(data, x= ~Observaciones, y= v ,type = "bar",
 
 ```
 
-```{r}
-conteos1 <- read.csv('edad.csv', header = TRUE)
-data1 <- as.data.frame(conteos1)
-v1 <-reorder(data1$Caracteristica,data1$Observaciones) #ordenar y convertir en factores
-p1 <- plot_ly(data1, x= data1$Observaciones, y= v1 ,type = "bar",
-             text = data1$Observaciones, textposition = 'auto',
-             marker = list(color = 'rgb(221,160,221)'))%>% 
-  layout(title = "",
-         yaxis= list(title = "Rango de edad", type ='category'),
-         xaxis = list(title = "",
-                     zeroline = FALSE,
-                     showline = FALSE,
-                     showticklabels = FALSE,
-                     showgrid = FALSE),
-         margin = list(l = 100)) # control del margen 
-```
 
-
-```{r echo=FALSE,fig.width=6}
-#Carga y formula
-datos <-read.csv("/home/jennifer/Descargas/ideds.csv")
-datos$EdadRango <- discretize(datos$Edad,method = "fixed", breaks  = c(-Inf,seq(0,65,5),Inf),labels = c("<0","0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64",">65"))
-## Caracterización general
-#General
-datos %>% group_by(EdadRango, Genero) %>% summarise(Poblacion=n()) %>% mutate(Edad = EdadRango) %>% ggplot() + geom_bar(aes(x=Edad, y = if_else(Genero=="M", -Poblacion,Poblacion), fill = Genero), stat="identity") + coord_flip() +theme_minimal() + xlab("Edad")+ ylab("Observaciones") + scale_y_continuous(labels = abs)-> ggcaracterizacion1
-
-datos$Cluster <- paste("Cluster", datos$Cluster, sep= " ")
-#ggcaracterizacion
-#ggplotly(ggcaracterizacion1) 
-```
-
-Column {data-width=600}
------------------------------------------------------------------------
-
-### Chart A
-
-```{r}
-ggplotly(ggcaracterizacion1)
-```
-
-Column {data-width=350}
------------------------------------------------------------------------
-
-### Chart B
 ```{r}
 p
+
 ```
 
-### Chart C
-```{r}
-p1
-```
+Column 
+-------------------------------------
+
+### Variantes presentes en toda la muestra poblacional.
+
+
+VARIANTE         | ID       | MAF
+---------------- | -------- | -----
+ADAR:c.78G>A     |rs1802645|0.02
+POMGNT1:c.1801A>G|rs6659553|0.30
+SYT11:c.144G>C   |rs822522 |0.21
+IQGAP3:c.618A>G  |rs1171547|0.23
+ACVR1:c.690G>A   |rs1146031|0.32
+TTNc.10213A>G    |rs6433728|0.01
+
+
 
 Cluster 1 
 =====================================  
@@ -108,7 +146,7 @@ par_clust <- "x" #cluster
 par_n <- 5 #Número de Cluster
 par_tipo <- "confidence"
 
-genes <- read.csv('cluster1.csv') 
+genes <- read.csv('cluster1_1.csv') 
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))
@@ -125,10 +163,16 @@ genes <- read.csv('cluster1.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
+<<<<<<< HEAD
+rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
+subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
+rules <- rules[-subsetRules]
+=======
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
 gi <- generatingItemsets(rules)
 d <- which(duplicated(gi))
 rules <-rules[-d]
+>>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
 rules <-sort(rules, by ="confidence")
 #gato <- as(rules,"data.frame")
 gatos <- data.frame(lhs = labels(lhs(rules)), rhs = labels(rhs(rules)), rules@quality) 
@@ -242,7 +286,7 @@ Column {data-width=400}
 
 ```{r echo=FALSE}
 #Carga y formula
-datos <-read.csv("/home/jennifer/Descargas/ideds.csv")
+datos <-read.csv("/home/jennifer/Documentos/clusters/ideds.csv")
 datos$EdadRango <- discretize(datos$Edad,method = "fixed", categories = c(-Inf,seq(0,65,5),Inf),labels = c("<0","0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64",">65"))
 ## Caracterización general
 #General
@@ -282,7 +326,7 @@ par_clust <- "x" #cluster
 par_n <- 5 #Número de Cluster
 par_tipo <- "confidence"
 
-genes <- read.csv('cluster2.csv') 
+genes <- read.csv('cluster2_2.csv') 
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1','c5','c3','c4','c2'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))""
@@ -299,7 +343,13 @@ genes <- read.csv('cluster2.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
+<<<<<<< HEAD
+rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
+subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
+rules <- rules[-subsetRules]
+=======
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
+>>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
 #gi <- generatingItemsets(rules)
 #d <- which(duplicated(gi))
 #rules <-rules[-d]
@@ -435,7 +485,7 @@ par_clust <- "x" #cluster
 par_n <- 5 #Número de Cluster
 par_tipo <- "confidence"
 
-genes <- read.csv('cluster3.csv') 
+genes <- read.csv('cluster3_3.csv') 
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1','c5','c3','c4','c2'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))
@@ -452,10 +502,16 @@ genes <- read.csv('cluster3.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
+<<<<<<< HEAD
+rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
+subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
+rules <- rules[-subsetRules]
+=======
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
 gi <- generatingItemsets(rules)
 d <- which(duplicated(gi))
 rules <-rules[-d]
+>>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
 rules <-sort(rules, by ="confidence")
 #rules <-sort(rules, by ="lift")
 #gato <- as(rules,"data.frame")
@@ -588,7 +644,7 @@ par_clust <- "x" #cluster
 par_n <- 5 #Número de Cluster
 par_tipo <- "confidence"
 
-genes <- read.csv('cluster4.csv') 
+genes <- read.csv('cluster4_4.csv') 
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1','c5','c3','c4','c2'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))
@@ -605,7 +661,13 @@ genes <- read.csv('cluster4.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
+<<<<<<< HEAD
+rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
+subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
+rules <- rules[-subsetRules]
+=======
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
+>>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
 #gi <- generatingItemsets(rules)
 #d <- which(duplicated(gi))
 #rules <-rules[-d]
@@ -648,7 +710,7 @@ df_rules = data.frame(
   rules_test@quality)
 
 #df_rules %<>% filter(grepl(par_clust,lhs)|grepl(par_clust,rhs))%>% top_n(par_n,par_tipo)
-df_rules %<>% filter(grepl(par_clust,lhs)|grepl(par_clust,rhs))%>% top_n(par_n,par_tipo)
+df_rules %<>% filter(grepl(par_clust,lhs)|grepl(par_clust,rhs))#%>% top_n(par_n,par_tipo)
 # Ajustar contenido de las celdas
 df_rules$regla <- rownames(df_rules)
 df_rules$lhs <- gsub("[\\{\\}]", "", df_rules$lhs)
@@ -700,8 +762,7 @@ set.seed(1234)
 a3<-visNetwork(nodes3, edges3, width = "90%") %>% 
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
   #visNodes(shape = "square") %>%                        # square for all nodes
-  visEdges(arrows ="to") %>%                            # arrow "to" for all edges
-  visGroups(groupname = "regla") %>%    # darkblue for group "A"
+  visEdges(arrows ="to") %>% visGroups(groupname = "regla") %>%    # darkblue for group "A"
   visGroups(groupname = "Condicion",shape = "icon",icon = list(code = "f007", color = "pink"), color = "red")
 ```
 
@@ -741,7 +802,7 @@ par_clust <- "x" #cluster
 par_n <- 5 #Número de Cluster
 par_tipo <- "confidence"
 
-genes <- read.csv('cluster5.csv') 
+genes <- read.csv('cluster5_5.csv') 
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1','c5','c3','c4','c2'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))
@@ -758,10 +819,16 @@ genes <- read.csv('cluster5.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
+<<<<<<< HEAD
+rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
+subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
+rules <- rules[-subsetRules]
+=======
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
 gi <- generatingItemsets(rules)
 d <- which(duplicated(gi))
 rulues <-rules[-d]
+>>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
 rules <-sort(rules, by ="confidence")
 #rules <-sort(rules, by ="lift")
 #gato <- as(rules,"data.frame")
@@ -907,12 +974,22 @@ selectInput("n_breaks", label = "Gene",
 par_clust <- "x" #cluster
 par_n <- 5 #Número de Cluster
 par_tipo <- "confidence"
+<<<<<<< HEAD
+#setwd('/home/jennifer/Documentos/dashboard/') # Path r
+genes <- read.csv('genesok1.csv') 
+#genes <-(as.character(genes$paciente_id))
+#genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
+#genes %<>% filter(cluster %in% c('c1'))
+#genes %<>% filter(cluster %in% c('c1','c3','c5'))
+#genes %<>% filter(Gene %in% c("CFTR"))#,"BRCA1","ATM","MLH2", "PMS1", "MSH2", "MSH6,
+=======
 
 genes <- read.csv('genesok.csv') 
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))
 genes %<>% filter(Gene %in% c("RB1"))#,"BRCA1","ATM","MLH2", "PMS1", "MSH2", "MSH6,
+>>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
                              #PMS2, EPCAM, STK11, APC, MUTYH, TP53, CDKN2A, 
                              #CDK4, PTEN, CDH1, BMPR1A, SMAD4, PALB2, ATM,
                              #CHEK2, NBN, BARD1, BRIP1, RAD51C, RAD51D, POLD, 
@@ -923,19 +1000,32 @@ genes %<>% filter(Gene %in% c("RB1"))#,"BRCA1","ATM","MLH2", "PMS1", "MSH2", "MS
 #genes <- sapply(genes,as.factor)
 #genes$cluster <- discretize(genes$cluster)
 #genes$edad <- discretize(genes$edad)
-#genes$sexo <- discretize(genes$sexo)
+#genes$paciente_id <- discretize(genes$paciente_id)
+#trans = read.transactions("idgenes1.csv", format = "single", sep = ",", cols = c("paciente_id", "gen"))
+
 g <- as(genes, "transactions")
+<<<<<<< HEAD
+rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
+## Borrar reglas redundantes
+subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
+rules <- rules[-subsetRules]
+#gi <- generatingItemsets(rules)
+#d <- which(duplicated(gi))
+#rules<-rules[-d]
+#rules <-sort(rules,decreasing=FALSE, by ="support")
+=======
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=4))
 gi <- generatingItemsets(rules)
 d <- which(duplicated(gi))
 rules<-rules[-d]
 rules <-sort(rules, by ="support")
+>>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
 #gato <- as(rules,"data.frame")
 gatos <- data.frame(lhs = labels(lhs(rules)), rhs = labels(rhs(rules)), rules@quality) 
 gatos$id <- rownames(gatos)
-gatos %>% filter((grepl("BRCA1",lhs)|grepl("BRCA2",lhs)|grepl("ATM",lhs))) %>% select(id)-> rules_filtered
+gatos %>% filter((grepl("BRCA1",lhs)|grepl("BRCA2",lhs)|grepl("ATM",lhs)))%>% select(id)-> rules_filtered
 rules_filtered <- as.vector(rules_filtered) #Filtro de reglas por gen.
-
+#gatos %>% filter((grepl("BRCA1",lhs))
 #plot(rules[rules_filtered[1:30,1]], method="graph", control=list(type="items"))
 
 summary(rules)
@@ -959,7 +1049,8 @@ inspect(rules, by = "lift")
 ####### Codigo se Grafico ########
 
 #Crear dataframe
-rules_test <- rules[1:20, by ="confidence"] # Filtro de reglas. 
+
+rules_test <- rules[1:10, by ="support"] # Filtro de reglas. 
 
 df_rules = data.frame(
   lhs = labels(lhs(rules_test)),
@@ -1037,7 +1128,7 @@ todo
 
 
 ```{r echo=FALSE}
-blc <- read.csv('genes.csv', stringsAsFactors = FALSE)
+blc <- read.csv('datos.csv', stringsAsFactors = FALSE)
 output$table1 <- renderDataTable({
 
 DT::datatable(blc, extensions='Scroller', selection = 'single', options = list(pageLength=100, scrollY='400px', scrollX=TRUE, autoWidth=TRUE, searchHighlight=TRUE, scroller=TRUE), filter = 'top', class = "display cell-border")

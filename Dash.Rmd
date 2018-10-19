@@ -135,8 +135,10 @@ POMGNT1:c.1801A>G|rs6659553|0.30
 SYT11:c.144G>C   |rs822522 |0.21
 IQGAP3:c.618A>G  |rs1171547|0.23
 ACVR1:c.690G>A   |rs1146031|0.32
-TTNc.10213A>G    |rs6433728|0.01
-
+TTN:c.10213A>G   |rs6433728|0.01
+CHL1:c.3165T>C   |rs6771714|0.16
+MST1R:c.3436G>T|rs7433231|-
+CASR:c.2013G>C|rs2036400|0.16
 
 
 Cluster 1 
@@ -163,16 +165,15 @@ genes <- read.csv('cluster1_1.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
-<<<<<<< HEAD
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
 subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
 rules <- rules[-subsetRules]
-=======
+
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
 gi <- generatingItemsets(rules)
 d <- which(duplicated(gi))
 rules <-rules[-d]
->>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
+
 rules <-sort(rules, by ="confidence")
 #gato <- as(rules,"data.frame")
 gatos <- data.frame(lhs = labels(lhs(rules)), rhs = labels(rhs(rules)), rules@quality) 
@@ -343,14 +344,11 @@ genes <- read.csv('cluster2_2.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
-<<<<<<< HEAD
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
 subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
 rules <- rules[-subsetRules]
-=======
+
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
->>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
-#gi <- generatingItemsets(rules)
 #d <- which(duplicated(gi))
 #rules <-rules[-d]
 rules <-sort(rules, by ="confidence")
@@ -502,16 +500,15 @@ genes <- read.csv('cluster3_3.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
-<<<<<<< HEAD
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
 subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
 rules <- rules[-subsetRules]
-=======
+
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
 gi <- generatingItemsets(rules)
 d <- which(duplicated(gi))
 rules <-rules[-d]
->>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
+
 rules <-sort(rules, by ="confidence")
 #rules <-sort(rules, by ="lift")
 #gato <- as(rules,"data.frame")
@@ -661,13 +658,13 @@ genes <- read.csv('cluster4_4.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
-<<<<<<< HEAD
+
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
 subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
 rules <- rules[-subsetRules]
-=======
+
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
->>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
+
 #gi <- generatingItemsets(rules)
 #d <- which(duplicated(gi))
 #rules <-rules[-d]
@@ -819,16 +816,15 @@ genes <- read.csv('cluster5_5.csv')
 #genes$edad <- discretize(genes$edad)
 #genes$sexo <- discretize(genes$sexo)
 g <- as(genes, "transactions")
-<<<<<<< HEAD
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.5, target = "rules",minlen=2))
 subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
 rules <- rules[-subsetRules]
-=======
+
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
 gi <- generatingItemsets(rules)
 d <- which(duplicated(gi))
 rulues <-rules[-d]
->>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
+
 rules <-sort(rules, by ="confidence")
 #rules <-sort(rules, by ="lift")
 #gato <- as(rules,"data.frame")
@@ -974,22 +970,21 @@ selectInput("n_breaks", label = "Gene",
 par_clust <- "x" #cluster
 par_n <- 5 #Número de Cluster
 par_tipo <- "confidence"
-<<<<<<< HEAD
+
 #setwd('/home/jennifer/Documentos/dashboard/') # Path r
-genes <- read.csv('genesok1.csv') 
+#genes <- read.csv('genesok1.csv') 
 #genes <-(as.character(genes$paciente_id))
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))
 #genes %<>% filter(Gene %in% c("CFTR"))#,"BRCA1","ATM","MLH2", "PMS1", "MSH2", "MSH6,
-=======
 
 genes <- read.csv('genesok.csv') 
 #genes$edad1 <- gsub(",","-",genes$edad1)#Cambio de coma
 #genes %<>% filter(cluster %in% c('c1'))
 #genes %<>% filter(cluster %in% c('c1','c3','c5'))
 genes %<>% filter(Gene %in% c("RB1"))#,"BRCA1","ATM","MLH2", "PMS1", "MSH2", "MSH6,
->>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
+
                              #PMS2, EPCAM, STK11, APC, MUTYH, TP53, CDKN2A, 
                              #CDK4, PTEN, CDH1, BMPR1A, SMAD4, PALB2, ATM,
                              #CHEK2, NBN, BARD1, BRIP1, RAD51C, RAD51D, POLD, 
@@ -1004,7 +999,7 @@ genes %<>% filter(Gene %in% c("RB1"))#,"BRCA1","ATM","MLH2", "PMS1", "MSH2", "MS
 #trans = read.transactions("idgenes1.csv", format = "single", sep = ",", cols = c("paciente_id", "gen"))
 
 g <- as(genes, "transactions")
-<<<<<<< HEAD
+
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=2))
 ## Borrar reglas redundantes
 subsetRules <- which(colSums(is.subset(rules, rules)) > 1)
@@ -1013,13 +1008,13 @@ rules <- rules[-subsetRules]
 #d <- which(duplicated(gi))
 #rules<-rules[-d]
 #rules <-sort(rules,decreasing=FALSE, by ="support")
-=======
+
 rules <- apriori(g, parameter = list(supp = 0.05, conf = 0.6, target = "rules",minlen=4))
 gi <- generatingItemsets(rules)
 d <- which(duplicated(gi))
 rules<-rules[-d]
 rules <-sort(rules, by ="support")
->>>>>>> 2f2f28dcc615f5eda91b9106195f23cd4c480895
+
 #gato <- as(rules,"data.frame")
 gatos <- data.frame(lhs = labels(lhs(rules)), rhs = labels(rhs(rules)), rules@quality) 
 gatos$id <- rownames(gatos)
